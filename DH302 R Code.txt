@@ -1,0 +1,163 @@
+CODE (Part 2)
+rm(list = ls())
+library(ggplot2)
+library(dplyr)
+DATA = read.csv("C:\\Users\\kvpkr\\Desktop\\DH302\\U.S._Chronic_Disease_Indicators__CDI_.csv") ## the pathway on your computer
+
+DATA[DATA == ""] <- NA 
+data = DATA
+
+data_CVD = subset(data, Topic== "Cardiovascular Disease")
+data_CVD_CholesterolScreening = subset(data_CVD, Question == "Cholesterol screening among adults aged >= 18 years" )
+data_CVD_CholesterolPrevalence = subset(data_CVD, Question ==  "High cholesterol prevalence among adults aged >= 18 years")
+
+
+data_CVD_AgeAdjustedRate_Prevalence= subset(data_CVD_CholesterolPrevalence, data_CVD_CholesterolPrevalence$LocationAbbr== "US")
+data_CVD_AgeAdjustedRate_Prevalence=subset(data_CVD_AgeAdjustedRate_Prevalence, data_CVD_AgeAdjustedRate_Prevalence$DataValueTypeID == "AGEADJPREV")
+  
+data_CVD_AgeAdjustedRate = data_CVD_AgeAdjustedRate_Prevalence
+
+Stratification_ID = unique(data_CVD$StratificationID1)
+
+data_CVD_AgeAdjustedRate_1 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[1])
+data_CVD_AgeAdjustedRate_2 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[2])
+data_CVD_AgeAdjustedRate_3 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[3])
+
+Xaxis = as.numeric(unlist(data_CVD_AgeAdjustedRate_1$YearStart))
+Yaxis_Overall = as.numeric(array(unlist(data_CVD_AgeAdjustedRate_1$DataValue)))
+Yaxis_Female = as.numeric(unlist(data_CVD_AgeAdjustedRate_2$DataValue))
+Yaxis_Male = as.numeric(unlist(data_CVD_AgeAdjustedRate_3$DataValue))
+
+ggplot(data= data_CVD_AgeAdjustedRate_1, aes(x = Xaxis, group = 1))+
+  geom_line(aes(y =Yaxis_Overall, color =  "Overall"))+
+  geom_line(aes(y =Yaxis_Female, color =  "Female"))+
+  geom_line(aes(y =Yaxis_Male, color =  "Male"))+
+  labs(y = "High cholesterol prevalence", x = "Time in years"  )
+
+CODE(Part 1) without plots (only for Coronary Artery disease and just vary one variable for others)
+ibrary(ggplot2)
+library(dplyr)
+DATA = read.csv("C:\\Users\\kvpkr\\Desktop\\DH302\\U.S._Chronic_Disease_Indicators__CDI_.csv") ## the pathway on your computer
+DATA[DATA == ""] <- NA 
+data = DATA
+data_CVD = subset(data, Topic== "Cardiovascular Disease")
+data_CVD_CrudeRate = subset(data_CVD, data_CVD$DataValueTypeID == "CRDRATE")
+data_CVD_AgeAdjustedRate= subset(data_CVD_CrudeRate, data_CVD$DataValueTypeID == "AGEADJPREV")
+
+#CVD1_1 - Total cardiovascular disease
+#CVD1_2 - Diseases of the heart
+#CVD1_3 - Coronary Artery disease
+#CVD1_4 - Heart failure
+#CVD1_5 - Cerebro vascular disease (stroke)
+QuestionIDs= unique(data_CVD$QuestionID)
+Questions = unique(data_CVD$Question)
+QuestionsStarred = c("CVD1_1", "CVD1_2", "CVD1_3","CVD1_4", "CVD3_5")
+Stratification_ID = unique(data_CVD$StratificationID1)
+
+data_CVD_AgeAdjustedRate_1 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[1])
+data_CVD_AgeAdjustedRate_2 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[2])
+data_CVD_AgeAdjustedRate_3 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[3])
+data_CVD_AgeAdjustedRate_4 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[4])
+data_CVD_AgeAdjustedRate_5 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[5])
+data_CVD_AgeAdjustedRate_6 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[6])
+data_CVD_AgeAdjustedRate_7 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[7])
+data_CVD_AgeAdjustedRate_8 = subset(data_CVD_AgeAdjustedRate, data_CVD_AgeAdjustedRate$StratificationID1 == Stratification_ID[8])
+G = list()
+for(i in 1:11){
+  G[[i]]= subset(data_CVD_AgeAdjustedRate_4, YearStart == 2009+i)
+}
+CVDStats = list()
+for(i in 1:11){
+  CVDStats[[i]]= subset(G[[i]], Topic == "Cardiovascular Disease")
+}
+HeartDisease = list() #Diseases of the heart
+for (i in 1:11){
+  HeartDisease[[i]]= subset(CVDStats[[i]], Question == "Mortality from diseases of the heart" )
+}
+CHF = list() #Congestive Heart Failure
+for (i in 1:11){
+  CHF[[i]]= subset(CVDStats[[i]], Question =="Mortality from heart failure"  )
+}
+CAD = list() #Coronary Artery Disease/ Coronary Heart Disease
+for (i in 1:11){
+  CAD[[i]]= subset(CVDStats[[i]], Question =="Mortality from coronary heart disease"  )
+}
+CVD = list() #Cerebro Vascular Disease
+for (i in 1:11){
+  CVD[[i]]= subset(CVDStats[[i]], Question =="Mortality from cerebrovascular disease (stroke)" )
+}
+Stratification_Unique = unique(data_CVD$Stratification1) #How many classifications are there?
+names(data) 
+us_state_abbrevs=c("AK","AL","AR","AS","AZ","CA","CO","CT","DC","DE",
+                   "FL","GA","GU","HI","IA","ID","IL","IN","KS","KY",
+                   "LA","MA","MD","ME","MI","MN","MO","MS","MT","NC",
+                   "ND","NE","NH","NJ","NM","NV","NY","OH","OK","OR",
+                   "PA","PR","RI","SC","SD","TN","TX","UT","VA","VI",
+                   "VT","WA","WI","WV","WY")    ##55 states
+StateWiseCVD =list()
+StateWiseCAD= list()
+StateWiseCHF= list()
+StateWiseHD = list()
+n=0
+for (j in 1:11){
+  for (i in 1:length(us_state_abbrevs)){
+    StateWiseCAD[[i+n]]= subset (CAD[[j]], CAD[[j]]$LocationAbbr == us_state_abbrevs[i])
+  }
+  n= n+length(us_state_abbrevs)
+}
+n=0
+for (j in 1:11){
+  for (i in 1:length(us_state_abbrevs)){
+    StateWiseCHF[[i+n]]= subset (CHF[[j]], CHF[[j]]$LocationAbbr == us_state_abbrevs[i])
+  }
+  n= n+length(us_state_abbrevs)
+}
+n=0
+for (j in 1:11){
+  for (i in 1:length(us_state_abbrevs)){
+    StateWiseCVD[[i+n]]= subset (CVD[[j]], CVD[[j]]$LocationAbbr == us_state_abbrevs[i])
+  }
+  n= n+length(us_state_abbrevs)
+}
+n=0
+for (j in 1:11){
+  for (i in 1:length(us_state_abbrevs)){
+    StateWiseHD[[i+n]]= subset (HeartDisease [[j]], HeartDisease [[j]]$LocationAbbr == us_state_abbrevs[i])
+  }
+  n= n+length(us_state_abbrevs)
+}
+StateWiseCAD_FinalAgeAdjustedRate_Cat8 = matrix()
+StateWiseCVD_FinalAgeAdjustedRate_Cat8 = matrix()
+StateWiseCHF_FinalAgeAdjustedRate_Cat8 = matrix()
+StateWiseHD_FinalAgeAdjustedRate_Cat8 = matrix()
+for (i in 1:605){
+  StateWiseCAD_FinalAgeAdjustedRate_Cat8[i] = StateWiseCAD[[i]][11]
+  StateWiseCVD_FinalAgeAdjustedRate_Cat8[i] = StateWiseCVD[[i]][11]
+  StateWiseCHF_FinalAgeAdjustedRate_Cat8[i] = StateWiseCHF[[i]][11]
+  StateWiseHD_FinalAgeAdjustedRate_Cat8[i] = StateWiseHD[[i]][11]
+}
+CADTimeSeriesCat8_FL = matrix()
+for (j in 1:9){
+  CADTimeSeriesCat8_FL[j] = StateWiseCAD_FinalAgeAdjustedRate_Cat8[11+55*(j-1)]
+}
+CADTimeSeriesCat8_IL = matrix()
+for (j in 1:9){
+  CADTimeSeriesCat8_IL[j] = StateWiseCAD_FinalAgeAdjustedRate_Cat8[17+55*(j-1)]
+}
+CADTimeSeriesCat8_PA = matrix()
+for (j in 1:9){
+  CADTimeSeriesCat8_PA[j] = StateWiseCAD_FinalAgeAdjustedRate_Cat8[41+55*(j-1)]
+}
+CADTimeSeriesCat8_CA = matrix()
+for (j in 1:9){
+  CADTimeSeriesCat8_CA[j] = StateWiseCAD_FinalAgeAdjustedRate_Cat8[6+55*(j-1)]
+}
+CADTimeSeriesCat8_NY = matrix()
+for (j in 1:9){
+  CADTimeSeriesCat8_NY[j] = StateWiseCAD_FinalAgeAdjustedRate_Cat8[47+55*(j-1)]
+}
+CADTimeSeriesCat8_FL = array(as.numeric(unlist(CADTimeSeriesCat8_FL)), dim = c(1,9))
+CADTimeSeriesCat8_NY = array(as.numeric(unlist(CADTimeSeriesCat8_NY)), dim = c(1,9))
+CADTimeSeriesCat8_CA = array(as.numeric(unlist(CADTimeSeriesCat8_CA)), dim = c(1,9))
+CADTimeSeriesCat8_PA = array(as.numeric(unlist(CADTimeSeriesCat8_PA)), dim = c(1,9))
+CADTimeSeriesCat8_IL = array(as.numeric(unlist(CADTimeSeriesCat8_IL)), dim = c(1,9))
